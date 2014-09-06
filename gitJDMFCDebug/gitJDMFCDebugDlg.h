@@ -122,13 +122,15 @@ private:
 
 	afx_msg void DealCommData(BYTE data);
 	afx_msg void EditShowDebug(char *p,UINT len);
-	afx_msg BOOL StringConvetToHex(CString cs,char *chdata);
+	afx_msg BOOL StringConvetToHex(CString cs,BYTE *chdata);
 	afx_msg BYTE TextConvettToHex(char *p,UINT len);
+	afx_msg void HexConvetToString(BYTE *pdat,UINT len);
 	CEdit m_DlgShowMsg;
 public:
 	afx_msg void OnBnClickedButton4OpenFile();
 	afx_msg void OnBnClickedButton1Output();
-	afx_msg void DealOpenFileData(char edata);
+	afx_msg void DealOpenFileData(BYTE edata);\
+
 
 private:
 	CEdit m_FindHead;
@@ -144,7 +146,7 @@ private:
 	BYTE m_OpenFileStatus;
 	UINT m_OpenFileLen;
 	UINT m_OpenFileMaxLen;
-	char m_OpenFileFrameBuf[256];
+	BYTE m_OpenFileFrameBuf[256];
 	UINT m_OpenFileFrameCount;
 
 	BYTE m_head;

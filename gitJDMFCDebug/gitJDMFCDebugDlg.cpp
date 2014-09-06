@@ -299,8 +299,78 @@ void CgitJDMFCDebugDlg::OnBnClickedButton4OpenFile()
 	}
 }
 
+const char StingHex[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
 
-void CgitJDMFCDebugDlg::DealOpenFileData(char edata)
+
+void CgitJDMFCDebugDlg::HexConvetToString(BYTE *pdat,UINT len)
+{
+	char *ch = NULL;
+	ch = new char[64];
+	int cnt = 0;
+	int i;
+	BYTE tmp;
+	char chtmp;
+
+
+	for (i = 0;i < len;i++)
+	{
+#if 1
+		tmp = pdat[i];
+		ch[i * 3] = StingHex[tmp / 16];
+		ch[i * 3 + 1] = StingHex[tmp % 16];
+		ch[i * 3 + 2] = ' ';
+	
+#else
+		ch[i] = StingHex[i % 16];
+#endif
+	}
+
+#if 1
+	ch[i * 3 + 0] = '\r';
+	ch[i * 3 + 1] = '\n';
+	ch[i * 3 + 2] = '\0';
+
+#endif	
+
+
+#if 0
+	ch[0] = '2';
+	ch[1] = 'E';
+	ch[2] = ' ';
+	ch[3] = '6';
+	ch[4] = '0';
+	ch[5] = ' ';
+	ch[6] = '0';
+	ch[7] = '5';
+	ch[8] = ' ';
+	ch[9] = ' ';
+	ch[10] = 'A';
+	ch[11] = 'A';
+	ch[12] = ' ';
+	ch[13] = 'B';
+	ch[14] = 'B';
+	ch[15] = ' ';
+	ch[16] = 'C';
+	ch[17] = 'C';
+	ch[18] = ' ';
+	ch[19] = 'D';
+	ch[20] = 'D';
+	ch[21] = ' ';
+	ch[22] = 'E';
+	ch[23] = 'E';
+	ch[24] = ' ';
+	ch[25] = '\r';
+	ch[26] = '\n';
+	ch[27] = '\0';
+
+#endif
+
+	EditShowDebug(ch,cnt+2);
+
+	delete ch;
+}
+
+void CgitJDMFCDebugDlg::DealOpenFileData(BYTE edata)
 {
 	switch(m_OpenFileStatus)
 	{
@@ -314,6 +384,13 @@ void CgitJDMFCDebugDlg::DealOpenFileData(char edata)
 		case 0X01:	if (m_type == edata)
 					{
 						m_OpenFileStatus = 0x02;
+						m_OpenFileMaxLen = m_len;
+
+						m_OpenFileFrameBuf[0] = m_head;
+						m_OpenFileFrameBuf[1] = m_type;
+						m_OpenFileFrameBuf[2] = m_len;
+
+						m_OpenFileLen = 0;
 					}
 					else
 					{
@@ -321,27 +398,27 @@ void CgitJDMFCDebugDlg::DealOpenFileData(char edata)
 					}
 					break;
 
-		case 0x02:	m_OpenFileLen = 0;
-					m_OpenFileMaxLen = m_len;
-					m_OpenFileStatus = 0x03;
-					break;
-
-		case 0X03:	if (m_OpenFileLen < m_OpenFileMaxLen)
+		case 0x02:	if (m_OpenFileLen < m_OpenFileMaxLen)
 					{
-						m_OpenFileFrameBuf[0] = m_head;
-						m_OpenFileFrameBuf[1] = m_type;
-						m_OpenFileFrameBuf[2] = m_len;
-						m_OpenFileFrameBuf[m_OpenFileLen++] = edata;
+						m_OpenFileFrameBuf[m_OpenFileLen + 3] = edata;
+						m_OpenFileLen++;
 					}
 					else
 					{
-						EditShowDebug(m_OpenFileFrameBuf,m_OpenFileFrameCount + 3);
+						m_OpenFileStatus = 0;
+#if 1
+						HexConvetToString(m_OpenFileFrameBuf,m_OpenFileLen + 3);
+#else
+						BYTE aaa[] = {0X2E,0X60,0X05,0XAA,0XBB,0XCC,0XDD,0XEE};
+						HexConvetToString(aaa,8);
+#endif
+
 					}
 					break;
 	}
 }
 
-BOOL CgitJDMFCDebugDlg::StringConvetToHex(CString cs,char *chdata)
+BOOL CgitJDMFCDebugDlg::StringConvetToHex(CString cs,BYTE *chdata)
 {
 	BOOL bConvet = TRUE;
 	int   iTextLen;
@@ -394,9 +471,7 @@ BOOL CgitJDMFCDebugDlg::StringConvetToHex(CString cs,char *chdata)
 
 		convertData = (convertData << (i * 4)) + charData;
 	}
-
-	*hexdata = convertData;
-
+	*chdata = convertData;
 	delete pszMultiByte;
 
 	return bConvet;
@@ -437,6 +512,7 @@ BYTE CgitJDMFCDebugDlg::TextConvettToHex(char *p,UINT len)
 		{
 			charData =  p[i] - 'A' + 10;
 		}
+
 		if (bCov)
 		{
 			convertData = (convertData << (cnt * 4)) + charData;
@@ -475,29 +551,25 @@ void CgitJDMFCDebugDlg::OnBnClickedButton1Output()
 
 
 	m_FindHead.GetWindowText(csFind);
-	int len = 0;
-	int length = csFind.GetLength();
-	bDeal = StringConvetToHex(csFind,&m_Findch[len]);
-	len += length;
+	bDeal = StringConvetToHex(csFind,&m_head);
+
 
 	m_FindType.GetWindowText(csFind);
-	length = csFind.GetLength();
-	bDeal = StringConvetToHex(csFind,&m_Findch[len]);
-	len += length;
+	bDeal = StringConvetToHex(csFind,&m_type);
 
 	m_FindLen.GetWindowText(csFind);
-	bDeal = StringConvetToHex(csFind,&m_Findch[len]);
-	len += length;
+	bDeal = StringConvetToHex(csFind,&m_len);
+
 
 	if (bDeal)
 	{
 		//解析文本信息
 		m_HexBuf = new BYTE[m_OpenFileLength];	
-		//TextConvettToHex(m_pOpenFileBuf,m_OpenFileLength);
+		TextConvettToHex(m_pOpenFileBuf,m_OpenFileLength);
 
-		for (i = 0;i < m_OpenFileLength;i++)
+		for (i = 0;i < m_HexBufCount;i++)
 		{
-			DealOpenFileData(m_pOpenFileBuf[i]);
+			DealOpenFileData(m_HexBuf[i]);
 		}
 		delete m_HexBuf;
 	}
