@@ -119,6 +119,21 @@ BOOL CgitJDMFCDebugDlg::OnInitDialog()
 	SetDlgItemText(IDC_EDIT1,__T("2e"));
 	SetDlgItemText(IDC_EDIT2,__T("60"));
 	SetDlgItemText(IDC_EDIT3,__T("5"));
+
+
+	GetDlgItem(IDC_EDIT1)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT2)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT3)->EnableWindow(FALSE);
+
+	GetDlgItem(IDC_RADIO4)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RADIO5)->EnableWindow(FALSE);
+
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BUTTON4)->EnableWindow(FALSE);
+
+
+	m_DlgShowMsg.SetLimitText(100000);
+
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
 
@@ -179,6 +194,16 @@ void CgitJDMFCDebugDlg::OnBnClickedRadio1Debug()
 	m_Select = eDebug;
 	m_CheckDebug.SetCheck(TRUE);
 	m_CheckSelect.SetCheck(TRUE);
+
+	GetDlgItem(IDC_EDIT1)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT2)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT3)->EnableWindow(FALSE);
+
+	GetDlgItem(IDC_RADIO4)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RADIO5)->EnableWindow(FALSE);
+
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(FALSE);
+	GetDlgItem(IDC_BUTTON4)->EnableWindow(FALSE);
 }
 
 
@@ -186,6 +211,15 @@ void CgitJDMFCDebugDlg::OnBnClickedRadio2Find()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_Select = eFind;
+	GetDlgItem(IDC_EDIT1)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT2)->EnableWindow(TRUE);
+	GetDlgItem(IDC_EDIT3)->EnableWindow(TRUE);
+
+	GetDlgItem(IDC_RADIO4)->EnableWindow(FALSE);
+	GetDlgItem(IDC_RADIO5)->EnableWindow(FALSE);
+
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BUTTON4)->EnableWindow(TRUE);
 }
 
 
@@ -193,20 +227,30 @@ void CgitJDMFCDebugDlg::OnBnClickedRadio3Calc()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	m_Select = eCalc;
+
+	GetDlgItem(IDC_EDIT1)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT2)->EnableWindow(FALSE);
+	GetDlgItem(IDC_EDIT3)->EnableWindow(FALSE);
+
+	GetDlgItem(IDC_RADIO4)->EnableWindow(TRUE);
+	GetDlgItem(IDC_RADIO5)->EnableWindow(TRUE);
+
+	GetDlgItem(IDC_BUTTON1)->EnableWindow(TRUE);
+	GetDlgItem(IDC_BUTTON4)->EnableWindow(TRUE);
 }
 
 
 void CgitJDMFCDebugDlg::OnBnClickedRadio4Dec()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	m_calcSelect = edec;
+	m_calcSelect = e8bit;
 }
 
 
 void CgitJDMFCDebugDlg::OnBnClickedRadio5Hex()
 {
 	// TODO: 在此添加控件通知处理程序代码
-	m_calcSelect = ehex;
+	m_calcSelect = e16bit;
 }
 
 void CgitJDMFCDebugDlg::DealCommData(BYTE data)
@@ -314,56 +358,14 @@ void CgitJDMFCDebugDlg::HexConvetToString(BYTE *pdat,UINT len)
 
 	for (i = 0;i < len;i++)
 	{
-#if 1
 		tmp = pdat[i];
 		ch[i * 3] = StingHex[tmp / 16];
 		ch[i * 3 + 1] = StingHex[tmp % 16];
 		ch[i * 3 + 2] = ' ';
-	
-#else
-		ch[i] = StingHex[i % 16];
-#endif
 	}
-
-#if 1
 	ch[i * 3 + 0] = '\r';
 	ch[i * 3 + 1] = '\n';
 	ch[i * 3 + 2] = '\0';
-
-#endif	
-
-
-#if 0
-	ch[0] = '2';
-	ch[1] = 'E';
-	ch[2] = ' ';
-	ch[3] = '6';
-	ch[4] = '0';
-	ch[5] = ' ';
-	ch[6] = '0';
-	ch[7] = '5';
-	ch[8] = ' ';
-	ch[9] = ' ';
-	ch[10] = 'A';
-	ch[11] = 'A';
-	ch[12] = ' ';
-	ch[13] = 'B';
-	ch[14] = 'B';
-	ch[15] = ' ';
-	ch[16] = 'C';
-	ch[17] = 'C';
-	ch[18] = ' ';
-	ch[19] = 'D';
-	ch[20] = 'D';
-	ch[21] = ' ';
-	ch[22] = 'E';
-	ch[23] = 'E';
-	ch[24] = ' ';
-	ch[25] = '\r';
-	ch[26] = '\n';
-	ch[27] = '\0';
-
-#endif
 
 	EditShowDebug(ch,cnt+2);
 
@@ -406,13 +408,7 @@ void CgitJDMFCDebugDlg::DealOpenFileData(BYTE edata)
 					else
 					{
 						m_OpenFileStatus = 0;
-#if 1
 						HexConvetToString(m_OpenFileFrameBuf,m_OpenFileLen + 3);
-#else
-						BYTE aaa[] = {0X2E,0X60,0X05,0XAA,0XBB,0XCC,0XDD,0XEE};
-						HexConvetToString(aaa,8);
-#endif
-
 					}
 					break;
 	}
@@ -549,31 +545,55 @@ void CgitJDMFCDebugDlg::OnBnClickedButton1Output()
 		MessageBox(__T("OpenFile Fail"));
 	}
 
+	m_HexBuf = new BYTE[m_OpenFileLength];	
+	TextConvettToHex(m_pOpenFileBuf,m_OpenFileLength);
 
-	m_FindHead.GetWindowText(csFind);
-	bDeal = StringConvetToHex(csFind,&m_head);
-
-
-	m_FindType.GetWindowText(csFind);
-	bDeal = StringConvetToHex(csFind,&m_type);
-
-	m_FindLen.GetWindowText(csFind);
-	bDeal = StringConvetToHex(csFind,&m_len);
-
-
-	if (bDeal)
+	if(eFind == m_Select)
 	{
-		//解析文本信息
-		m_HexBuf = new BYTE[m_OpenFileLength];	
-		TextConvettToHex(m_pOpenFileBuf,m_OpenFileLength);
+		m_FindHead.GetWindowText(csFind);
+		bDeal = StringConvetToHex(csFind,&m_head);
 
-		for (i = 0;i < m_HexBufCount;i++)
+
+		m_FindType.GetWindowText(csFind);
+		bDeal = StringConvetToHex(csFind,&m_type);
+
+		m_FindLen.GetWindowText(csFind);
+		bDeal = StringConvetToHex(csFind,&m_len);
+
+
+		if (bDeal)
 		{
-			DealOpenFileData(m_HexBuf[i]);
+			//解析文本信息
+			for (i = 0;i < m_HexBufCount;i++)
+			{
+				DealOpenFileData(m_HexBuf[i]);
+			}
+			delete m_HexBuf;
 		}
-		delete m_HexBuf;
+		MessageBox(__T("文件查找完毕"));
 	}
-	
+	else if (eCalc == m_Select)
+	{
+		if (e8bit == m_calcSelect)
+		{
+			BYTE check8bitSum = 0;
+			for (UINT i = 0;i < m_HexBufCount;i++)
+			{
+				check8bitSum += m_HexBuf[i];
+			}
+		}
+		else if (e16bit == m_calcSelect)
+		{
+			UINT16 check16bitSum = 0;
+			for (UINT i = 0;i < m_HexBufCount;i++)
+			{
+				check16bitSum += m_HexBuf[i];
+			}
+		}
+	}
+		 
+
+
 	//关闭文件
 	OpenFile.Close();
 }

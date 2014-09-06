@@ -26,8 +26,8 @@ enum eSelect
 
 enum Calc
 {
-	ehex = 0,
-	edec
+	e8bit = 0,
+	e16bit
 };
 
 // CgitJDMFCDebugDlg ¶Ô»°¿ò
