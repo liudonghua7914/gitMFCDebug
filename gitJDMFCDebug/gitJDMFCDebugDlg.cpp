@@ -78,6 +78,8 @@ BEGIN_MESSAGE_MAP(CgitJDMFCDebugDlg, CDialogEx)
 	ON_BN_CLICKED(IDC_BUTTON4, &CgitJDMFCDebugDlg::OnBnClickedButton4OpenFile)
 	ON_BN_CLICKED(IDC_BUTTON1, &CgitJDMFCDebugDlg::OnBnClickedButton1Output)
 	ON_EN_CHANGE(IDC_EDIT1, &CgitJDMFCDebugDlg::OnEnChangeEdit1Head)
+	ON_BN_CLICKED(IDC_BUTTON2, &CgitJDMFCDebugDlg::OnBnClickedButton2Clear)
+	ON_BN_CLICKED(IDC_BUTTON3, &CgitJDMFCDebugDlg::OnBnClickedButton3SaveFile)
 END_MESSAGE_MAP()
 
 
@@ -133,6 +135,8 @@ BOOL CgitJDMFCDebugDlg::OnInitDialog()
 
 
 	m_DlgShowMsg.SetLimitText(100000);
+
+	m_calcSelect = e8bit;
 
 	return TRUE;  // 除非将焦点设置到控件，否则返回 TRUE
 }
@@ -218,7 +222,7 @@ void CgitJDMFCDebugDlg::OnBnClickedRadio2Find()
 	GetDlgItem(IDC_RADIO4)->EnableWindow(FALSE);
 	GetDlgItem(IDC_RADIO5)->EnableWindow(FALSE);
 
-	GetDlgItem(IDC_BUTTON1)->EnableWindow(TRUE);
+	
 	GetDlgItem(IDC_BUTTON4)->EnableWindow(TRUE);
 }
 
@@ -520,6 +524,8 @@ BYTE CgitJDMFCDebugDlg::TextConvettToHex(char *p,UINT len)
 	return 0;
 }
 
+WCHAR wHex[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D','E','F'};
+
 void CgitJDMFCDebugDlg::OnBnClickedButton1Output()
 {
 	// TODO: 在此添加控件通知处理程序代码
@@ -545,8 +551,9 @@ void CgitJDMFCDebugDlg::OnBnClickedButton1Output()
 		MessageBox(__T("OpenFile Fail"));
 	}
 
-	m_HexBuf = new BYTE[m_OpenFileLength];	
-	TextConvettToHex(m_pOpenFileBuf,m_OpenFileLength);
+	m_HexBuf = new BYTE[m_OpenFileLength + 1];	
+	m_HexBuf[m_OpenFileLength] = '\0';
+	TextConvettToHex(m_pOpenFileBuf,m_OpenFileLength + 1);
 
 	if(eFind == m_Select)
 	{
@@ -574,22 +581,74 @@ void CgitJDMFCDebugDlg::OnBnClickedButton1Output()
 	}
 	else if (eCalc == m_Select)
 	{
-		if (e8bit == m_calcSelect)
-		{
+
 			BYTE check8bitSum = 0;
+			WCHAR w8bit[6];
 			for (UINT i = 0;i < m_HexBufCount;i++)
 			{
 				check8bitSum += m_HexBuf[i];
 			}
-		}
-		else if (e16bit == m_calcSelect)
-		{
+			w8bit[0] = wHex[check8bitSum / 16];
+			w8bit[1] = wHex[check8bitSum % 16];
+			w8bit[2] = '\r';
+			w8bit[3] = '\n';
+			w8bit[4] = '\0';
+
+			m_DlgShowMsg.SetSel(0,-1);
+			m_DlgShowMsg.ReplaceSel(__T("8bit checksum: "));
+
+			m_DlgShowMsg.SetSel(-1,-1);
+			m_DlgShowMsg.ReplaceSel(w8bit);
+
+			m_DlgShowMsg.SetSel(-1,-1);
+			m_DlgShowMsg.ReplaceSel(__T("8bit checksum~: "));
+
+			
+			w8bit[0] = wHex[(0XFF - check8bitSum) / 16];
+			w8bit[1] = wHex[(0XFF - check8bitSum) % 16];
+			w8bit[2] = '\r';
+			w8bit[3] = '\n';
+			w8bit[4] = '\0';
+			m_DlgShowMsg.SetSel(-1,-1);
+			m_DlgShowMsg.ReplaceSel(w8bit);
+			
+
+
+			m_DlgShowMsg.SetSel(-1,-1);
+			m_DlgShowMsg.ReplaceSel(__T("16bit checksum: "));
+
+
+			WCHAR w16bit[10];
 			UINT16 check16bitSum = 0;
 			for (UINT i = 0;i < m_HexBufCount;i++)
 			{
 				check16bitSum += m_HexBuf[i];
 			}
-		}
+			w16bit[0] = wHex[((check16bitSum >> 8) & 0XFF) / 16 ];
+			w16bit[1] = wHex[((check16bitSum >> 8) & 0XFF) % 16 ];
+			w16bit[2] = wHex[((check16bitSum >> 0) & 0XFF) / 16 ];
+			w16bit[3] = wHex[((check16bitSum >> 0) & 0XFF) % 16 ];
+			w16bit[4] = '\r';
+			w16bit[5] = '\n';
+			w16bit[6] = '\0';
+			m_DlgShowMsg.SetSel(-1,-1);
+			m_DlgShowMsg.ReplaceSel(w16bit);
+
+
+			m_DlgShowMsg.SetSel(-1,-1);
+			m_DlgShowMsg.ReplaceSel(__T("16bit checksum~: "));
+			w16bit[0] = wHex[(((0XFFFF - check16bitSum) >> 8) & 0XFF) / 16 ];
+			w16bit[1] = wHex[(((0XFFFF - check16bitSum) >> 8) & 0XFF) % 16 ];
+			w16bit[2] = wHex[(((0XFFFF - check16bitSum) >> 0) & 0XFF) / 16 ];
+			w16bit[3] = wHex[(((0XFFFF - check16bitSum) >> 0) & 0XFF) % 16 ];
+			w16bit[4] = '\r';
+			w16bit[5] = '\n';
+			w16bit[6] = '\0';
+			m_DlgShowMsg.SetSel(-1,-1);
+			m_DlgShowMsg.ReplaceSel(w16bit);
+
+
+
 	}
 		 
 
@@ -607,5 +666,21 @@ void CgitJDMFCDebugDlg::OnEnChangeEdit1Head()
 	// 同时将 ENM_CHANGE 标志“或”运算到掩码中。
 
 	// TODO:  在此添加控件通知处理程序代
+
+}
+
+
+void CgitJDMFCDebugDlg::OnBnClickedButton2Clear()
+{
+	// TODO: 在此添加控件通知处理程序代码
+	m_DlgShowMsg.SetSel(0,-1);
+	m_DlgShowMsg.ReplaceSel(__T(""));
+}
+
+
+void CgitJDMFCDebugDlg::OnBnClickedButton3SaveFile()
+{
+	// TODO: 在此添加控件通知处理程序代码
+
 
 }

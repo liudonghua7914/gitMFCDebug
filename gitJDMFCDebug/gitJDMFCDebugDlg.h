@@ -156,4 +156,6 @@ private:
 	char m_Findch[10];
 public:
 	afx_msg void OnEnChangeEdit1Head();
+	afx_msg void OnBnClickedButton2Clear();
+	afx_msg void OnBnClickedButton3SaveFile();
 };
