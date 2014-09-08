@@ -154,6 +154,8 @@ private:
 	BYTE m_len;
 
 	char m_Findch[10];
+
+	CString m_cSaveFile;
 public:
 	afx_msg void OnEnChangeEdit1Head();
 	afx_msg void OnBnClickedButton2Clear();

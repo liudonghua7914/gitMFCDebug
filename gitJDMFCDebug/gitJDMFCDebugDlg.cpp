@@ -681,6 +681,21 @@ void CgitJDMFCDebugDlg::OnBnClickedButton2Clear()
 void CgitJDMFCDebugDlg::OnBnClickedButton3SaveFile()
 {
 	// TODO: 在此添加控件通知处理程序代码
+	CString m_strDate,m_strTime;
+	CTime m_time;  
 
+	m_time=CTime::GetCurrentTime();             //获取当前时间日期  
+	m_strDate=m_time.Format(_T("%x"));          //格式化日期  
+	m_strTime=m_time.Format(_T("%X"));          //格式化时间  
+	m_cSaveFile=m_time.Format(_T("%Y-%m-%d %H:%M:%S %A end"));   //格式化日期时间
 
+	int len = m_cSaveFile.GetLength();
+
+	
+
+	///CFile saveFile(m_cSaveFile,CFile::modeCreate | CFile::modeReadWrite);
+
+	//saveFile.Write((char *)("addfdfdff"),5);
+
+	MessageBox(m_cSaveFile);
 }
