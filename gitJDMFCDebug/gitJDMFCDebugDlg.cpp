@@ -514,7 +514,11 @@ BYTE CgitJDMFCDebugDlg::TextConvettToHex(char *p,UINT len)
 		{
 			charData =  p[i] - 'A' + 10;
 		}
-
+		else
+		{
+			MessageBox(__T("文件中有非法输入"));
+			bCov = FALSE;
+		}
 		if (bCov)
 		{
 			convertData = (convertData << (cnt * 4)) + charData;
