@@ -366,10 +366,12 @@ void CgitJDMFCDebugDlg::HexConvetToString(BYTE *pdat,UINT len)
 		ch[i * 3] = StingHex[tmp / 16];
 		ch[i * 3 + 1] = StingHex[tmp % 16];
 		ch[i * 3 + 2] = ' ';
+	
 	}
 	ch[i * 3 + 0] = '\r';
 	ch[i * 3 + 1] = '\n';
 	ch[i * 3 + 2] = '\0';
+
 
 	EditShowDebug(ch,cnt+2);
 
@@ -682,20 +684,36 @@ void CgitJDMFCDebugDlg::OnBnClickedButton3SaveFile()
 {
 	// TODO: 在此添加控件通知处理程序代码
 	CString m_strDate,m_strTime;
+	
 	CTime m_time;  
-
 	m_time=CTime::GetCurrentTime();             //获取当前时间日期  
 	m_strDate=m_time.Format(_T("%x"));          //格式化日期  
 	m_strTime=m_time.Format(_T("%X"));          //格式化时间  
-	m_cSaveFile=m_time.Format(_T("%Y-%m-%d %H:%M:%S %A end"));   //格式化日期时间
+	m_cSaveFile=m_time.Format(_T("%Y-%m-%d_%H-%M-%S"));   //格式化日期时间
 
-	int len = m_cSaveFile.GetLength();
+	m_cSaveFile = m_cSaveFile + __T(".txt");
 
 	
 
-	///CFile saveFile(m_cSaveFile,CFile::modeCreate | CFile::modeReadWrite);
+	CFile saveFile(m_cSaveFile,CFile::modeCreate | CFile::modeReadWrite);
 
-	//saveFile.Write((char *)("addfdfdff"),5);
+	int len = m_DlgShowMsg.GetWindowTextLength();
+	WCHAR *pText = new WCHAR[len];
+	//pText[len] = '\0';
+	m_DlgShowMsg.GetWindowText(pText,len);
 
+	char *pszMultiByte;
+
+	int iTextLen = WideCharToMultiByte(CP_ACP, 0, pText, -1, NULL, 0, NULL, NULL);
+
+	pszMultiByte = new char[iTextLen + 1];
+	pszMultiByte[iTextLen] = '\0';
+	WideCharToMultiByte(CP_ACP, 0, pText, -1, pszMultiByte, iTextLen, NULL, NULL);
+	delete pText;
+
+	saveFile.Write((char *)pszMultiByte,iTextLen - 1);
 	MessageBox(m_cSaveFile);
+	saveFile.Close();
+	delete pszMultiByte;
+	
 }

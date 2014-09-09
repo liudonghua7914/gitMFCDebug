@@ -155,6 +155,8 @@ private:
 
 	char m_Findch[10];
 
+
+
 	CString m_cSaveFile;
 public:
 	afx_msg void OnEnChangeEdit1Head();
