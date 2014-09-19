@@ -352,8 +352,8 @@ const char StingHex[] = {'0','1','2','3','4','5','6','7','8','9','A','B','C','D'
 
 void CgitJDMFCDebugDlg::HexConvetToString(BYTE *pdat,UINT len)
 {
-	char *ch = NULL;
-	ch = new char[64];
+	char ch[256];
+	
 	int cnt = 0;
 	int i;
 	BYTE tmp;
@@ -372,10 +372,7 @@ void CgitJDMFCDebugDlg::HexConvetToString(BYTE *pdat,UINT len)
 	ch[i * 3 + 1] = '\n';
 	ch[i * 3 + 2] = '\0';
 
-
 	EditShowDebug(ch,cnt+2);
-
-	delete ch;
 }
 
 void CgitJDMFCDebugDlg::DealOpenFileData(BYTE edata)
@@ -396,7 +393,7 @@ void CgitJDMFCDebugDlg::DealOpenFileData(BYTE edata)
 
 						m_OpenFileFrameBuf[0] = m_head;
 						m_OpenFileFrameBuf[1] = m_type;
-						m_OpenFileFrameBuf[2] = m_len;
+						//m_OpenFileFrameBuf[2] = m_len;
 
 						m_OpenFileLen = 0;
 					}
@@ -406,7 +403,23 @@ void CgitJDMFCDebugDlg::DealOpenFileData(BYTE edata)
 					}
 					break;
 
-		case 0x02:	if (m_OpenFileLen < m_OpenFileMaxLen)
+		case 0x02:	if(m_len > edata)
+					{
+						m_OpenFileStatus = 0;
+						MessageBox(__T("len > MAX Len"));
+						m_OpenFileStatus = 0x03;
+						m_OpenFileFrameBuf[2] = edata;
+						m_OpenFileMaxLen = edata;
+					}
+					else
+					{
+						m_OpenFileStatus = 0x03;
+						m_OpenFileFrameBuf[2] = edata;
+						m_OpenFileStatus = 0x03;
+					}				
+					break;
+					
+		case 0x03:	if (m_OpenFileLen < m_OpenFileMaxLen)
 					{
 						m_OpenFileFrameBuf[m_OpenFileLen + 3] = edata;
 						m_OpenFileLen++;
@@ -578,7 +591,7 @@ void CgitJDMFCDebugDlg::OnBnClickedButton1Output()
 		{
 			//解析文本信息
 			for (i = 0;i < m_HexBufCount;i++)
-			{
+			{			
 				DealOpenFileData(m_HexBuf[i]);
 			}
 			delete m_HexBuf;
